@@ -1,7 +1,7 @@
 language: python
 
 python:
-- "3.5"
+- '3.5'
 
 install:
 - pip install -r requirements.txt
@@ -14,3 +14,11 @@ after_success: coveralls
 
 notifications:
   slack: teamtaverna:iP55LweubU8UOBgu9e0cTeED
+
+deploy:
+  provider: heroku
+  api_key:
+    secure: CkDQsfQ6nbSf4la73Y/3puCZrJzoqo8/Y9p3qvHH6QnhEM+Vb3SNL0l39fpsNsp4m341TQiQ6bLHgzXfKSnajfdyJdBy1cvLdaHoXOnmb9yxFFVm9TLHdj+Wg48Bsy+6uuIfUGFsB/Wn/clLu2RJuK9sLeEoJ+teStTNsQFpm1wgyNCe3v0eyG+BRztnkUNmeAYxEpMj4iOEcfMlgJifiFR3nUULV557r+svfrLjwok7tHmSldUA2N5aM/seCNYqo4TmsXGI5xpaseiawRFgL22FUP48AQc8aujaa1tgi34NqwN9oXdtOm8LpSdhEl3LAnJnh+xBNweeZ7xodm771V2/B5IInzacVUUcdcFrAqGiD1hAOnXk/HprDjfSXQuOTLdOsP5T55GaRK6EyYWWHNDe3mYG0nDV2YjvMj2pIrh1N56dc197pJssIPF7ehMEjPkbclexJyu/loqtn9Oeh3XNn+2X8r/jRcuimCdyy+UWZg2cDqNA3NXKsnqatHpKraB7klLl+C00uqO1WW+baGypePu5c02kGT+FG4+fQI7+EJvUM29bs13eiAZ1z8en2Bdl3ZNZJcfPv34sBG+8ywIzl3KHNxUghvU1IDpCu+BPOJhwcNDJPEWKvJX++bHF2EGcuWaZSP1IvM9xCFq+U0gYP/cCSIZf6W5Be8NwZ4I=
+  app:
+    master: taverna-slackbot
+    staging: taverna-slackbot-staging
