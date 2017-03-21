@@ -1,5 +1,7 @@
 from datetime import date, timedelta
 
+import jinja2
+
 
 def _get_day_arg(day_arg):
     """
@@ -48,3 +50,10 @@ def get_date(day_arg):
     """
     day_num = _get_day_arg(day_arg)
     return date.today() + timedelta(days=day_num)
+
+
+def render(filename, context={}):
+    path = 'templates'
+    return jinja2.Environment(
+        loader=jinja2.FileSystemLoader(path)
+    ).get_template(filename).render(context)
