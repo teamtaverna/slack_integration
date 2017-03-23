@@ -25,3 +25,14 @@ class GetDateTest(unittest.TestCase):
         tomorrow = get_date('tomorrow')
 
         self.assertEqual(tomorrow, datetime.date(2017, 3, 16))
+
+    def test_misspelt_day(self):
+        mistake = 'tooday'
+
+        self.assertRaises(ValueError, get_date, mistake)
+
+    @freeze_time("2017-03-15")
+    def test_get_date_removes_leading_and_trailing_spaces(self):
+        day = get_date('  today  ')
+
+        self.assertEqual(day, datetime.date(2017, 3, 15))
