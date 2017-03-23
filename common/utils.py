@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 
 
-def get_day_arg(day_arg):
+def _get_day_arg(day_arg):
     """
     This function takes in a day argument and returns the right timedelta
     days argument for it.
@@ -49,5 +49,5 @@ def get_date(day_arg):
     something python can understand. For instance, when the user types
     in something like yesterday, we want to return the date of yesterday.
     """
-    day_num = get_day_arg(day_arg)
+    day_num = _get_day_arg(day_arg)
     return date.today() + timedelta(days=day_num)
