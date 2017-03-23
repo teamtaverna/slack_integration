@@ -9,7 +9,7 @@ def get_day_arg(day_arg):
     can convert it to the appropriate pythonic date object.
     We also want to be able to convert weekdays and some date format here.
     """
-    day_arg = day_arg.lower()
+    day_arg = day_arg.strip().lower()
 
     day_to_num_dict = {
         'yesterday': -1,
@@ -22,7 +22,8 @@ def get_day_arg(day_arg):
     if day_num is not None:
         return day_num
     else:
-        days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+        days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday',
+                'saturday', 'sunday']
 
         if day_arg in days:
             # In python, Monday is 0 and Sunday is 6
@@ -39,8 +40,7 @@ def get_day_arg(day_arg):
                 # It is a future weekday
                 return (day_index - current_weekday_num)
         else:
-            # A date format string was passed in
-            pass
+            raise ValueError('Cannot resolve date argument passed in.')
 
 
 def get_date(day_arg):
