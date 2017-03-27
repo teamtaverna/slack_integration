@@ -33,11 +33,7 @@ def _get_day_arg(day_arg):
             if current_weekday_num == day_index:
                 # The weekday passed in is today
                 return day_to_num_dict['today']
-            elif current_weekday_num > day_index:
-                # It is a previous weekday
-                return 0 - (current_weekday_num - day_index)
             else:
-                # It is a future weekday
                 return (day_index - current_weekday_num)
         else:
             raise ValueError('Cannot resolve date argument passed in.')
