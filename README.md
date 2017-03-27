@@ -55,3 +55,8 @@ $ python run.py
 ```
 
 Watch the bot come online on slack in a few seconds.
+
+To run tests
+```
+$ python -m unittest discover tests 'test_*.py'
+```
