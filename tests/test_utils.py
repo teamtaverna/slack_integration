@@ -32,6 +32,12 @@ class GetDateTest(unittest.TestCase):
         self.assertRaises(ValueError, get_date, mistake)
 
     @freeze_time("2017-03-15")
+    def test_case_insensitivity(self):
+        today = get_date('TOdaY')
+
+        self.assertEqual(today, datetime.date(2017, 3, 15))
+
+    @freeze_time("2017-03-15")
     def test_get_date_removes_leading_and_trailing_spaces(self):
         day = get_date('  today  ')
 

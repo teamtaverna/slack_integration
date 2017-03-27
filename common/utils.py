@@ -18,7 +18,8 @@ def _get_day_arg(day_arg):
     }
 
     day_num = day_to_num_dict.get(day_arg)
-    # More logic if a date object or weekday value is passed in.
+
+    # More logic if a weekday value is passed in.
     if day_num is not None:
         return day_num
     else:
@@ -34,7 +35,7 @@ def _get_day_arg(day_arg):
                 # The weekday passed in is today
                 return day_to_num_dict['today']
             else:
-                return (day_index - current_weekday_num)
+                return day_index - current_weekday_num
         else:
             raise ValueError('Cannot resolve date argument passed in.')
 
