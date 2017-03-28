@@ -8,4 +8,5 @@ from common.utils import render
 @respond_to('help', re.IGNORECASE)
 def help(message):
     response = render('help_response.j2')
+    # import ipdb; ipdb.set_trace()
     message.reply(response)
