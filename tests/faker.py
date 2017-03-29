@@ -1,14 +1,15 @@
-def fake_creds():
-    return {
-        'FAKE_CHANNEL': 'C12942JF92'
-    }
+"""
+This file holds reusable fake stuff for mocking the tests.
+"""
+
+FAKE_CHANNEL = 'C12942JF92'
 
 
 class FakeClient:
     def __init__(self):
         self.rtm_messages = []
 
-    def rtm_send_message(self, channel, message, attachments=None):
+    def rtm_send_message(self, channel, message):
         self.rtm_messages.append((channel, message))
 
 
