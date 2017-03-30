@@ -1,7 +1,7 @@
 from unittest import mock, TestCase
 
 from plugins import help_plugin
-from faker import FAKE_CHANNEL, FakeClient, FakeMessage
+from faker import fake_creds, FakeClient, FakeMessage
 from common.utils import render
 
 
@@ -10,7 +10,7 @@ class TestHelpFunction(TestCase):
     def message():
         client = FakeClient()
         msg = {
-            'channel': FAKE_CHANNEL,
+            'channel': fake_creds['FAKE_CHANNEL'],
             'type': 'message',
             'text': 'help'
         }

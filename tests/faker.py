@@ -2,7 +2,9 @@
 This file holds reusable fake stuff for mocking the tests.
 """
 
-FAKE_CHANNEL = 'C12942JF92'
+fake_creds = {
+    'FAKE_CHANNEL': 'C12942JF92',
+}
 
 
 class FakeClient:
