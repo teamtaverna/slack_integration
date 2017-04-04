@@ -3,6 +3,11 @@ from datetime import date, timedelta
 import jinja2
 
 
+def get_days():
+    return ['monday', 'tuesday', 'wednesday', 'thursday', 'friday',
+            'saturday', 'sunday']
+
+
 def _get_day_arg(day_arg):
     """
     This function takes in a day argument and returns the right timedelta
@@ -25,8 +30,7 @@ def _get_day_arg(day_arg):
     if day_num is not None:
         return day_num
     else:
-        days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday',
-                'saturday', 'sunday']
+        days = get_days()
 
         if day_arg in days:
             # In python, Monday is 0 and Sunday is 6
