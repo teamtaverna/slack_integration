@@ -1,42 +1,44 @@
 import re
-import requests
 
-import dotenv
 from slackbot.bot import respond_to
 
-from common.utils import get_days, render
-
-dotenv.load()
+from common.utils import get_days, render, make_api_request
 
 
 def make_api_request_for_timetables():
-    api_url = dotenv.get('API_URL_ENDPOINT')
-    query = 'query{timetables{edges{node{name, cycleLength,refCycleDay, \
+    query = 'query{timetables{edges{node{name, slug, cycleLength,refCycleDay, \
              vendors{edges{node{name}}}, admins{edges{node{username}}}}}}}'
-    endpoint = '{}?query={}'.format(api_url, query)
-    headers = {'X-TavernaToken': dotenv.get('X-TAVERNATOKEN')}
-    return requests.post(endpoint, headers=headers).json()['timetables']
+    return make_api_request(query)['timetables']
 
 
-def check_num_available_timetables():
+def check_num_timetables():
     timetables = make_api_request_for_timetables()
     return len(timetables)
+
+
+def list_timetable_names():
+    timetables = make_api_request_for_timetables()
+    return [timetable['slug'] for timetable in timetables]
 
 
 @respond_to('menu', re.IGNORECASE)
 def menu(message):
     days = get_days()
-    num_of_timetables = check_num_available_timetables()
     # Convert message text to list to remove multiple spaces that may have
     # been mistakenly added by the user and convert the list back to string
     message_text_list = message.body['text'].lower().split()
     message_text = ' '.join(message_text_list)
+    timetable_names = list_timetable_names()
 
     if message_text == 'menu':
         context = {
-            'num_of_timetables': num_of_timetables
+            'num_of_timetables': check_num_timetables(),
+            'timetable_names': timetable_names
         }
         response = render('menu_response.j2', context)
+        message.reply(response)
+    elif message_text_list[1] in timetable_names:
+        response = 'Here is the menu for today'
         message.reply(response)
     elif message_text == 'menu today':
         response = 'This is today'
@@ -44,11 +46,8 @@ def menu(message):
     elif message_text == 'menu tomorrow':
         response = 'This is tomorrow'
         message.reply(response)
-    # Add one more check for if the user enters `menu timetable_name`
+    elif message_text_list[1] in days:
+        response = 'This is a weekday'
+        message.reply(response)
     else:
-        if message_text_list[1] in days:
-            response = 'This is a weekday'
-            message.reply(response)
-        else:
-            response = 'Wrong command yo! Type help to get help.'
-            message.reply(response)
+        response = 'Wrong command yo! Type help to get help.'

@@ -1,6 +1,10 @@
+import requests
 from datetime import date, timedelta
 
 import jinja2
+import dotenv
+
+dotenv.load()
 
 
 def get_days():
@@ -60,3 +64,10 @@ def render(filename, context={}, path='templates'):
     return jinja2.Environment(
         loader=jinja2.FileSystemLoader(path)
     ).get_template(filename).render(context)
+
+
+def make_api_request(query):
+    api_url = dotenv.get('API_URL_ENDPOINT')
+    endpoint = '{}?query={}'.format(api_url, query)
+    headers = {'X-TavernaToken': dotenv.get('X-TAVERNATOKEN')}
+    return requests.post(endpoint, headers=headers).json()

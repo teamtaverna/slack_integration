@@ -1,11 +1,13 @@
 {% if num_of_timetables < 1 %}
-    ```Sorry, there are no meals available.```
+```Sorry, there are no meals available.```
 {% elif num_of_timetables == 1 %}
     ```
     Here is the menu for today.
     ```
 {% else %}
-    ```
-    Here are the available timetables
-    ```
+```The following timetables are available:
+    {% for timetable in timetable_names -%}
+        * {{ timetable }}
+    {% endfor %}
+Please try again with the command "menu TIMETABLE_NAME"```
 {% endif %}
