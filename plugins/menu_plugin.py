@@ -4,8 +4,7 @@ import requests
 import dotenv
 from slackbot.bot import respond_to
 
-from common.utils import get_days
-
+from common.utils import get_days, render
 
 dotenv.load()
 
@@ -27,14 +26,11 @@ def check_num_available_timetables():
 @respond_to('menu', re.IGNORECASE)
 def menu(message):
     days = get_days()
+    num_of_timetables = check_num_available_timetables()
 
     if message.body['text'] == 'menu':
-        # TODO: if timetables == 1, return menu for the day
-        # else
-        # let user know the list of timetables available
-        # and the command to use to check
-
-        response = 'This is menu'
+        context = {'num_of_timetables': num_of_timetables}
+        response = render('menu_response.j2', context)
         message.reply(response)
     elif message.body['text'].lower() == 'menu today':
         response = 'This is today'

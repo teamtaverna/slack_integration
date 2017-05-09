@@ -1,3 +1,11 @@
-```
-This is the menu
-```
+{% if num_of_timetables < 1 %}
+    ```Sorry, there are no meals available.```
+{% elif num_of_timetables == 1 %}
+    ```
+    Here is the menu for today.
+    ```
+{% else %}
+    ```
+    Here are the available timetables
+    ```
+{% endif %}
