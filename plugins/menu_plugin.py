@@ -27,6 +27,7 @@ def menu(message):
     # Convert message text to list to remove multiple spaces that may have
     # been mistakenly added by the user and convert the list back to string
     message_text_list = message.body['text'].lower().split()
+    len_msg_text_list = len(message_text_list)
     message_text = ' '.join(message_text_list)
     timetable_names = list_timetable_names()
 
@@ -37,7 +38,7 @@ def menu(message):
         }
         response = render('menu_response.j2', context)
         message.reply(response)
-    elif message_text_list[1] in timetable_names:
+    elif len_msg_text_list == 2 and message_text_list[1] in timetable_names:
         response = 'Here is the menu for today'
         message.reply(response)
     elif message_text == 'menu today':
@@ -46,8 +47,10 @@ def menu(message):
     elif message_text == 'menu tomorrow':
         response = 'This is tomorrow'
         message.reply(response)
-    elif message_text_list[1] in days:
+    elif len_msg_text_list == 2 and message_text_list[1] in days:
         response = 'This is a weekday'
         message.reply(response)
     else:
-        response = 'Wrong command yo! Type help to get help.'
+        error_msg = 'Wrong menu command'
+        response = render('help_response.j2', error=error_msg)
+        message.reply(response)

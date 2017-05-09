@@ -1,9 +1,12 @@
 import dotenv
 
+from common.utils import render
+
 dotenv.load()
 
 API_TOKEN = dotenv.get('SLACKBOT_API_TOKEN')
-DEFAULT_REPLY = 'Sorry, I have not been fully configured yet.'
+error_msg = "Hey there, that's a wrong command!"
+DEFAULT_REPLY = render('help_response.j2', error=error_msg)
 
 # TO DO:
 # The value for ERRORS_TO should be specified in the env file later on

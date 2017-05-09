@@ -60,7 +60,9 @@ def get_date(day_arg):
     return date.today() + timedelta(days=day_num)
 
 
-def render(filename, context={}, path='templates'):
+def render(filename, context={}, error=None, path='templates'):
+    if error:
+        context['error'] = error
     return jinja2.Environment(
         loader=jinja2.FileSystemLoader(path)
     ).get_template(filename).render(context)
