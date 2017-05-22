@@ -11,9 +11,11 @@ def make_api_request_for_timetables():
     return make_api_request(query)['timetables']
 
 
-def check_num_timetables():
-    timetables = make_api_request_for_timetables()
-    return len(timetables)
+def make_api_request_for_servings(timetable, date):
+    query = 'query{servings(timetable:"%s",date:"%s"){dateServed, \
+             menuItem{cycleDay,meal{name},course{name,sequenceOrder}, \
+             dish{name},timetable{name}}}}' % (timetable, date)
+    return make_api_request(query)['servings']
 
 
 def list_timetable_names():
@@ -33,7 +35,7 @@ def menu(message):
 
     if message_text == 'menu':
         context = {
-            'num_of_timetables': check_num_timetables(),
+            'num_of_timetables': len(timetable_names),
             'timetable_names': timetable_names
         }
         response = render('menu_response.j2', context)
