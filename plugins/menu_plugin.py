@@ -2,7 +2,7 @@ import re
 
 from slackbot.bot import respond_to
 
-from common.utils import get_days, render, make_api_request
+from common.utils import get_days, render, make_api_request, date_to_str
 
 
 def make_api_request_for_timetables():
@@ -12,9 +12,9 @@ def make_api_request_for_timetables():
 
 
 def make_api_request_for_servings(timetable, date):
-    query = 'query{servings(timetable:"%s",date:"%s"){dateServed, \
-             menuItem{cycleDay,meal{name},course{name,sequenceOrder}, \
-             dish{name},timetable{name}}}}' % (timetable, date)
+    query = 'query{servings(timetable:"%s",date:"%s"){dateServed,\
+             menuItem{cycleDay,meal{name},course{name,sequenceOrder},\
+             dish{name},timetable{name}}}}'% (timetable, date)
     return make_api_request(query)['servings']
 
 
@@ -34,8 +34,14 @@ def menu(message):
     timetable_names = list_timetable_names()
 
     if message_text == 'menu':
+        num_timetables = len(timetable_names)
+        servings = make_api_request_for_servings(timetable_names[0], date_to_str('today'))
+        print(servings)
+        if num_timetables == 1:
+            pass
+
         context = {
-            'num_of_timetables': len(timetable_names),
+            'num_of_timetables': num_timetables,
             'timetable_names': timetable_names
         }
         response = render('menu_response.j2', context)

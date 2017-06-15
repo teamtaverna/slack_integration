@@ -60,6 +60,15 @@ def get_date(day_arg):
     return date.today() + timedelta(days=day_num)
 
 
+def date_to_str(day_arg):
+    """
+    This function converts the python date format gotten from get_date function
+    to string for graphql api request.
+    """
+    date = get_date(day_arg)
+    return date.strftime('%Y-%m-%d')
+
+
 def render(filename, context={}, error=None, path='templates'):
     if error:
         context['error'] = error
