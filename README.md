@@ -31,10 +31,13 @@ Next,
     ```
     mkvirtualenv <envname>
     ```
-
 * Use the flag `-p python3` if you also have python 2 installed
     ```
     mkvirtualenv -p python3 <envname>
+    ```
+* Make sure you are in your virtualenv.
+    ```
+    cd <envname>
     ```
 
 * Install requirements in the virtual environment created
