@@ -1,13 +1,22 @@
 {% if num_of_timetables < 1 %}
-```Sorry, there are no meals available.```
+    ```Sorry, there are no meals available.```
 {% elif num_of_timetables == 1 %}
-    ```
-    Here is the menu for today.
-    ```
+    {% if meals %}
+        ```Here is the menu for today.
+        {% for meal, values in meals.items() -%}
+            {{ meal|upper }}:
+            {% for dict_item in values -%}
+                {{dict_item['public_id']}}: {{dict_item['dish']|title}} ({{dict_item['course']|lower}})
+            {% endfor %}
+        {% endfor %}```
+    {% else %}
+        ```Sorry there are no meals available to be served today.```
+    {% endif %}
 {% else %}
-```The following timetables are available:
-    {% for timetable in timetable_names -%}
-        * {{ timetable }}
-    {% endfor %}
-Please try again with the command "menu TIMETABLE_NAME"```
+    ```The following timetables are available:
+        {% for timetable in timetable_names -%}
+            * {{ timetable }}
+        {% endfor %}
+    Please try again with the command "menu TIMETABLE_NAME"
+    OR type "help" to see a list of more commands.```
 {% endif %}
