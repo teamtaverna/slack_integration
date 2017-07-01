@@ -82,3 +82,14 @@ def make_api_request(query):
     endpoint = '{}?query={}'.format(api_url, query)
     headers = {'X-TavernaToken': dotenv.get('X-TAVERNATOKEN')}
     return requests.post(endpoint, headers=headers).json()
+
+
+def make_api_request_for_timetables():
+    query = 'query{timetables{edges{node{name, slug, cycleLength,refCycleDay, \
+             vendors{edges{node{name}}}, admins{edges{node{username}}}}}}}'
+    return make_api_request(query)['timetables']
+
+
+def list_timetable_names():
+    timetables = make_api_request_for_timetables()
+    return [timetable['slug'] for timetable in timetables]

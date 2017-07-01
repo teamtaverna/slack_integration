@@ -1,3 +1,5 @@
+{% from 'shared_macros.j2' import timetables %}
+
 {% if num_of_timetables < 1 %}
     ```Sorry, there are no meals available.```
 {% elif num_of_timetables == 1 %}
@@ -13,10 +15,7 @@
         ```Sorry there are no meals available to be served today.```
     {% endif %}
 {% else %}
-    ```The following timetables are available:
-        {% for timetable in timetable_names -%}
-            * {{ timetable }}
-        {% endfor %}
+    ```{{ timetables(timetable_names) }}
     Please try again with the command "menu TIMETABLE_NAME"
     OR type "help" to see a list of more commands.```
 {% endif %}

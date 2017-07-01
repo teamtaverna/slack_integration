@@ -1,0 +1,6 @@
+{% macro timetables(timetable_names) -%}
+    The following timetables are available:
+    {% for timetable in timetable_names -%}
+        * {{ timetable }}
+    {% endfor %}
+{%- endmacro %}

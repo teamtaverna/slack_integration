@@ -3,13 +3,8 @@ from operator import itemgetter
 
 from slackbot.bot import respond_to
 
-from common.utils import get_days, render, make_api_request, date_to_str
-
-
-def make_api_request_for_timetables():
-    query = 'query{timetables{edges{node{name, slug, cycleLength,refCycleDay, \
-             vendors{edges{node{name}}}, admins{edges{node{username}}}}}}}'
-    return make_api_request(query)['timetables']
+from common.utils import (get_days, render, make_api_request, date_to_str,
+                          list_timetable_names,)
 
 
 def make_api_request_for_servings(timetable, date):
@@ -17,11 +12,6 @@ def make_api_request_for_servings(timetable, date):
              menuItem{cycleDay,meal{name},course{name,sequenceOrder},\
              dish{name},timetable{name}}}}' % (timetable, date)
     return make_api_request(query)['servings']
-
-
-def list_timetable_names():
-    timetables = make_api_request_for_timetables()
-    return [timetable['slug'] for timetable in timetables]
 
 
 def servings_to_dict(servings):
