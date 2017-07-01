@@ -5,11 +5,17 @@ from slackbot.bot import respond_to
 from common.utils import render, list_timetable_names
 
 
-@respond_to('timetable', re.IGNORECASE)
+@respond_to('show timetable', re.IGNORECASE)
 def timetable(message):
-    timetable_names = list_timetable_names()
-    context = {
-        'timetable_names': timetable_names
-    }
-    response = render('timetable_response.j2', context)
+    message_text_list = message.body['text'].lower().split()
+    len_msg_text_list = len(message_text_list)
+
+    if len_msg_text_list == 2:
+        timetable_names = list_timetable_names()
+        context = {
+            'timetable_names': timetable_names
+        }
+        response = render('timetable_response.j2', context)
+    else:
+        response = render('help_response.j2')
     message.reply(response)

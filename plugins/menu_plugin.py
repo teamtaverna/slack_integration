@@ -40,6 +40,19 @@ def servings_to_dict(servings):
     }
 
 
+def get_meals(timetable, day):
+    """
+    Get meals for a particular timetable.
+    day is a string either today, tomorrow, yesterday, or any weekday
+    """
+    servings = make_api_request_for_servings(
+        timetable, date_to_str(day)
+    )
+    if servings is not None:
+        meals = servings_to_dict(servings)
+        return meals
+
+
 @respond_to('menu', re.IGNORECASE)
 def menu(message):
     days = get_days()
@@ -49,37 +62,53 @@ def menu(message):
     len_msg_text_list = len(message_text_list)
     message_text = ' '.join(message_text_list)
     timetable_names = list_timetable_names()
+    if len_msg_text_list > 1:
+        timetable_name = message_text_list[1]
+    if len_msg_text_list > 2:
+        day_of_week = message_text_list[2]
+
+    num_timetables = len(timetable_names)
+    context = {
+        'timetable_names': timetable_names,
+        'day_of_week': 'today'
+    }
 
     if message_text == 'menu':
-        num_timetables = len(timetable_names)
-        servings = make_api_request_for_servings(
-            timetable_names[0], date_to_str('today')
-        )
-
-        context = {
-            'num_of_timetables': num_timetables,
-            'timetable_names': timetable_names
-        }
-
-        if num_timetables == 1 and servings is not None:
-            meals = servings_to_dict(servings)
-            context.update({'meals': meals})
+        if num_timetables == 1:
+            meals = get_meals(timetable_names[0], 'today')
+            if meals:
+                context.update({'meals': meals})
+            else:
+                context.update({'no_meals': True})
+        else:
+            context.update({'multiple_timetables': True})
 
         response = render('menu_response.j2', context)
         message.reply(response)
-    elif len_msg_text_list == 2 and message_text_list[1] in timetable_names:
-        response = 'Here is the menu for today'
+    elif len_msg_text_list == 2 and timetable_name in timetable_names:
+        # User entered "menu TIMETABLE_NAME"
+        meals = get_meals(timetable_name, 'today')
+        if meals:
+            context.update({'meals': meals})
+        else:
+            context.update({'no_meals': True})
+
+        response = render('menu_response.j2', context)
         message.reply(response)
-    elif message_text == 'menu today':
-        response = 'This is today'
-        message.reply(response)
-    elif message_text == 'menu tomorrow':
-        response = 'This is tomorrow'
-        message.reply(response)
-    elif len_msg_text_list == 2 and message_text_list[1] in days:
-        response = 'This is a weekday'
+    elif (len_msg_text_list == 3 and
+          timetable_name in timetable_names and
+          day_of_week in days):
+        # User entered "menu TIMETABLE_NAME day"
+        meals = get_meals(timetable_name, day_of_week)
+        context.update({'day_of_week': day_of_week})
+
+        if meals:
+            context.update({'meals': meals})
+        else:
+            context.update({'no_meals': True})
+
+        response = render('menu_response.j2', context)
         message.reply(response)
     else:
-        error_msg = 'Wrong menu command'
-        response = render('help_response.j2', error=error_msg)
+        response = render('help_response.j2')
         message.reply(response)

@@ -9,7 +9,7 @@ dotenv.load()
 
 def get_days():
     return ['monday', 'tuesday', 'wednesday', 'thursday', 'friday',
-            'saturday', 'sunday']
+            'saturday', 'sunday', 'today', 'tomorrow', 'yesterday']
 
 
 def _get_day_arg(day_arg):

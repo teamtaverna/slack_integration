@@ -1,20 +1,16 @@
 {% from 'shared_macros.j2' import timetables %}
 
-{% if num_of_timetables < 1 %}
-    ```Sorry, there are no meals available.```
-{% elif num_of_timetables == 1 %}
-    {% if meals %}
-        ```Here is the menu for today.
+{% if meals %}
+    ```Here is the menu for {{ day_of_week }}.
         {% for meal, values in meals.items() -%}
             {{ meal|upper }}:
             {% for dict_item in values -%}
                 {{dict_item['public_id']}}: {{dict_item['dish']|title}} ({{dict_item['course']|lower}})
             {% endfor %}
         {% endfor %}```
-    {% else %}
-        ```Sorry there are no meals available to be served today.```
-    {% endif %}
-{% else %}
+{% elif no_meals %}
+    ```Sorry there are no meals available for {{ day_of_week }}.```
+{% elif multiple_timetables %}
     ```{{ timetables(timetable_names) }}
     Please try again with the command "menu TIMETABLE_NAME"
     OR type "help" to see a list of more commands.```
