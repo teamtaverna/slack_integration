@@ -1,6 +1,7 @@
 import re
 from operator import itemgetter
 
+from dateutil import parser
 from slackbot.bot import respond_to
 
 from common.utils import (get_days, render, make_api_request, date_to_str,
@@ -12,6 +13,13 @@ def make_api_request_for_servings(timetable, date):
              menuItem{cycleDay,meal{name},course{name,sequenceOrder},\
              dish{name},timetable{name}}}}' % (timetable, date)
     return make_api_request(query)['servings']
+
+
+def make_api_request_for_events():
+    query = 'query {events{edges{node{name, action, startDate, endDate}}}}'
+    events = make_api_request(query)['events']
+    if 'edges' not in events:
+        return events
 
 
 def servings_to_dict(servings):
@@ -48,9 +56,25 @@ def get_meals(timetable, day):
     servings = make_api_request_for_servings(
         timetable, date_to_str(day)
     )
+
     if servings is not None:
         meals = servings_to_dict(servings)
         return meals
+
+
+def get_event(day):
+    events = make_api_request_for_events()
+    event_list = []
+
+    if events:
+        date = parser.parse(date_to_str(day)).isoformat()
+        for event in events:
+            start_date = parser.parse(event['startDate']).isoformat()
+            end_date = parser.parse(event['endDate']).isoformat()
+
+            if (date >= start_date) and (date <= end_date):
+                event_list.append(event)
+    return event_list
 
 
 @respond_to('menu', re.IGNORECASE)
@@ -62,12 +86,15 @@ def menu(message):
     len_msg_text_list = len(message_text_list)
     message_text = ' '.join(message_text_list)
     timetable_names = list_timetable_names()
+
     if len_msg_text_list > 1:
         timetable_name = message_text_list[1]
+
     if len_msg_text_list > 2:
         day_of_week = message_text_list[2]
 
     num_timetables = len(timetable_names)
+
     context = {
         'timetable_names': timetable_names,
         'day_of_week': 'today'
@@ -76,7 +103,7 @@ def menu(message):
     if message_text == 'menu':
         if num_timetables == 1:
             meals = get_meals(timetable_names[0], 'today')
-            if meals:
+            if meals and not get_event('today'):
                 context.update({'meals': meals})
             else:
                 context.update({'no_meals': True})
@@ -85,16 +112,18 @@ def menu(message):
 
         response = render('menu_response.j2', context)
         message.reply(response)
+
     elif len_msg_text_list == 2 and timetable_name in timetable_names:
         # User entered "menu TIMETABLE_NAME"
         meals = get_meals(timetable_name, 'today')
-        if meals:
+        if meals and not get_event('today'):
             context.update({'meals': meals})
         else:
             context.update({'no_meals': True})
 
         response = render('menu_response.j2', context)
         message.reply(response)
+
     elif (len_msg_text_list == 3 and
           timetable_name in timetable_names and
           day_of_week in days):
@@ -102,13 +131,14 @@ def menu(message):
         meals = get_meals(timetable_name, day_of_week)
         context.update({'day_of_week': day_of_week})
 
-        if meals:
+        if meals and not get_event(day_of_week):
             context.update({'meals': meals})
         else:
             context.update({'no_meals': True})
 
         response = render('menu_response.j2', context)
         message.reply(response)
+
     else:
         response = render('help_response.j2')
         message.reply(response)
