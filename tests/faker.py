@@ -16,11 +16,11 @@ class FakeClient:
 
 
 class FakeMessage:
-    def __init__(self, client, msg):
+    def __init__(self, client, body):
         self._client = client
-        self._msg = msg
+        self._body = body
 
     def reply(self, message):
         # Perhaps a bit unnecessary to do it this way, but it's close to how
         # dispatcher and message actually works
-        self._client.rtm_send_message(self._msg['channel'], message)
+        self._client.rtm_send_message(self._body['channel'], message)

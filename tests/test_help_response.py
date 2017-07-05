@@ -1,4 +1,5 @@
-from unittest import mock, TestCase
+from unittest import TestCase
+from unittest.mock import patch
 
 from plugins import help_plugin
 from faker import fake_creds, FakeClient, FakeMessage
@@ -7,18 +8,18 @@ from common.utils import render
 
 class TestHelpFunction(TestCase):
 
-    def message():
-        client = FakeClient()
-        msg = {
-            'channel': fake_creds['FAKE_CHANNEL'],
-            'type': 'message',
-            'text': 'help'
-        }
+    client = FakeClient()
+    msg = {
+        'channel': fake_creds['FAKE_CHANNEL'],
+        'type': 'message',
+        'text': 'help'
+    }
 
-        return FakeMessage(client, msg)
+    fake_message = FakeMessage(client, msg)
 
-    @mock.patch('slackbot.dispatcher.Message', return_value=message)
+    @patch('slackbot.dispatcher.Message', return_value=fake_message)
     def test_help(self, mock_object):
+        mock_object.body = self.msg
         help_plugin.help(mock_object)
 
         self.assertTrue(mock_object.reply.called)
