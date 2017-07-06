@@ -8,77 +8,83 @@ from common.utils import (get_days, render, make_api_request, date_to_str,
                           list_timetable_names,)
 
 
-def make_api_request_for_servings(timetable, date):
-    query = 'query{servings(timetable:"%s",date:"%s"){publicId, dateServed, vendor{name},\
-             menuItem{cycleDay,meal{name},course{name,sequenceOrder},\
-             dish{name},timetable{name}}}}' % (timetable, date)
-    return make_api_request(query)['servings']
+class MenuHelper:
+    """Contains helper functions for menu response."""
 
+    def make_api_request_for_servings(self, timetable, date):
+        query = 'query{servings(timetable:"%s",date:"%s"){publicId, dateServed, vendor{name},\
+                 menuItem{cycleDay,meal{name},course{name,sequenceOrder},\
+                 dish{name},timetable{name}}}}' % (timetable, date)
+        return make_api_request(query)['servings']
 
-def make_api_request_for_events():
-    query = 'query {events{edges{node{name, action, startDate, endDate}}}}'
-    events = make_api_request(query)['events']
-    if 'edges' not in events:
-        return events
+    def make_api_request_for_events(self):
+        query = 'query {events{edges{node{name, action, startDate, endDate}}}}'
+        events = make_api_request(query)['events']
+        if 'edges' not in events:
+            return events
 
+    def servings_to_dict(self, servings):
+        new_dict = {}
 
-def servings_to_dict(servings):
-    new_dict = {}
+        for obj in servings:
+            meal = obj['menuItem']['meal']['name']
+            menu_item = obj['menuItem']
+            new_obj = {
+                'public_id': obj['publicId'],
+                'course': menu_item['course']['name'],
+                'sequence_order': menu_item['course']['sequenceOrder'],
+                'dish': menu_item['dish']['name']
+            }
+            if new_dict.get(meal):
+                new_dict[meal].append(new_obj)
+            else:
+                new_dict[meal] = [new_obj]
 
-    for obj in servings:
-        meal = obj['menuItem']['meal']['name']
-        menu_item = obj['menuItem']
-        new_obj = {
-            'public_id': obj['publicId'],
-            'course': menu_item['course']['name'],
-            'sequence_order': menu_item['course']['sequenceOrder'],
-            'dish': menu_item['dish']['name']
+        # Re-order the meals by sequence order
+        return {
+            key: sorted(
+                value,
+                key=itemgetter('sequence_order')
+            ) for key, value in new_dict.items()
         }
-        if new_dict.get(meal):
-            new_dict[meal].append(new_obj)
+
+    def get_meals(self, timetable, day):
+        """
+        Get meals for a particular timetable.
+        day is a string either today, tomorrow, yesterday, or any weekday
+        """
+        servings = self.make_api_request_for_servings(
+            timetable, date_to_str(day)
+        )
+
+        if servings is not None:
+            meals = self.servings_to_dict(servings)
+            return meals
+
+    def get_event(self, day):
+        events = self.make_api_request_for_events()
+        event_list = []
+
+        if events:
+            date = parser.parse(date_to_str(day)).isoformat()
+            for event in events:
+                start_date = parser.parse(event['startDate']).isoformat()
+                end_date = parser.parse(event['endDate']).isoformat()
+
+                if (date >= start_date) and (date <= end_date):
+                    event_list.append(event)
+        return event_list
+
+    def meals_check_context_update(self, meals, context, day):
+        if meals and not self.get_event(day):
+            context.update({'meals': meals})
         else:
-            new_dict[meal] = [new_obj]
-
-    # Re-order the meals by sequence order
-    return {
-        key: sorted(
-            value,
-            key=itemgetter('sequence_order')
-        ) for key, value in new_dict.items()
-    }
-
-
-def get_meals(timetable, day):
-    """
-    Get meals for a particular timetable.
-    day is a string either today, tomorrow, yesterday, or any weekday
-    """
-    servings = make_api_request_for_servings(
-        timetable, date_to_str(day)
-    )
-
-    if servings is not None:
-        meals = servings_to_dict(servings)
-        return meals
-
-
-def get_event(day):
-    events = make_api_request_for_events()
-    event_list = []
-
-    if events:
-        date = parser.parse(date_to_str(day)).isoformat()
-        for event in events:
-            start_date = parser.parse(event['startDate']).isoformat()
-            end_date = parser.parse(event['endDate']).isoformat()
-
-            if (date >= start_date) and (date <= end_date):
-                event_list.append(event)
-    return event_list
+            context.update({'no_meals': True})
 
 
 @respond_to('menu', re.IGNORECASE)
 def menu(message):
+    helper = MenuHelper()
     days = get_days()
     # Convert message text to list to remove multiple spaces that may have
     # been mistakenly added by the user and convert the list back to string
@@ -102,11 +108,8 @@ def menu(message):
 
     if message_text == 'menu':
         if num_timetables == 1:
-            meals = get_meals(timetable_names[0], 'today')
-            if meals and not get_event('today'):
-                context.update({'meals': meals})
-            else:
-                context.update({'no_meals': True})
+            meals = helper.get_meals(timetable_names[0], 'today')
+            helper.meals_check_context_update(meals, context, 'today')
         else:
             context.update({'multiple_timetables': True})
 
@@ -115,11 +118,8 @@ def menu(message):
 
     elif len_msg_text_list == 2 and timetable_name in timetable_names:
         # User entered "menu TIMETABLE_NAME"
-        meals = get_meals(timetable_name, 'today')
-        if meals and not get_event('today'):
-            context.update({'meals': meals})
-        else:
-            context.update({'no_meals': True})
+        meals = helper.get_meals(timetable_name, 'today')
+        helper.meals_check_context_update(meals, context, 'today')
 
         response = render('menu_response.j2', context)
         message.reply(response)
@@ -128,13 +128,9 @@ def menu(message):
           timetable_name in timetable_names and
           day_of_week in days):
         # User entered "menu TIMETABLE_NAME day"
-        meals = get_meals(timetable_name, day_of_week)
+        meals = helper.get_meals(timetable_name, day_of_week)
         context.update({'day_of_week': day_of_week})
-
-        if meals and not get_event(day_of_week):
-            context.update({'meals': meals})
-        else:
-            context.update({'no_meals': True})
+        helper.meals_check_context_update(meals, context, day_of_week)
 
         response = render('menu_response.j2', context)
         message.reply(response)
