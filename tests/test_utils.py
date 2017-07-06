@@ -46,7 +46,7 @@ class GetDateTest(unittest.TestCase):
     @freeze_time("2017-03-15")
     def test_day_of_the_week(self):
         days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday',
-                'saturday', 'sunday']
+                'saturday', 'sunday', 'today', 'tomorrow', 'yesterday']
 
         self.assertEqual(get_date(days[0]), datetime.date(2017, 3, 13))
         self.assertEqual(get_date(days[1]), datetime.date(2017, 3, 14))
@@ -55,3 +55,6 @@ class GetDateTest(unittest.TestCase):
         self.assertEqual(get_date(days[4]), datetime.date(2017, 3, 17))
         self.assertEqual(get_date(days[5]), datetime.date(2017, 3, 18))
         self.assertEqual(get_date(days[6]), datetime.date(2017, 3, 19))
+        self.assertEqual(get_date(days[7]), datetime.date(2017, 3, 15))
+        self.assertEqual(get_date(days[8]), datetime.date(2017, 3, 16))
+        self.assertEqual(get_date(days[9]), datetime.date(2017, 3, 14))
