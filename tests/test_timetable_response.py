@@ -34,46 +34,46 @@ class TestTimetableFunction(TestCase):
 
     @patch('slackbot.dispatcher.Message', return_value=correct_message)
     @patch('common.utils.make_api_request_for_timetables')
-    def test_timetable_with_correct_message(self, utils_mock, mock_msg_object):
+    def test_timetable_with_correct_message(self, utils_mock, mock_msg):
         utils_mock.return_value = [{'slug': 'timetable1'}]
         context = {
             'timetable_names': [utils_mock.return_value[0]['slug']]
         }
-        mock_msg_object.body = self.correct_msg
-        timetable_plugin.timetable(mock_msg_object)
+        mock_msg.body = self.correct_msg
+        timetable_plugin.timetable(mock_msg)
 
-        self.assertTrue(mock_msg_object.reply.called)
+        self.assertTrue(mock_msg.reply.called)
 
-        mock_msg_object.reply.assert_called_with(
+        mock_msg.reply.assert_called_with(
             render('timetable_response.j2', context)
         )
 
     @patch('slackbot.dispatcher.Message', return_value=correct_msg_with_spaces)
     @patch('common.utils.make_api_request_for_timetables')
-    def test_timetable_with_spaces_in_correct_msg(self, utils_mock, mock_msg_obj):
+    def test_timetable_with_spaces_in_correct_msg(self, utils_mock, mock_msg):
         utils_mock.return_value = [{'slug': 'timetable1'}]
         context = {
             'timetable_names': [utils_mock.return_value[0]['slug']]
         }
-        mock_msg_obj.body = self.correct_msg_spaces
-        timetable_plugin.timetable(mock_msg_obj)
+        mock_msg.body = self.correct_msg_spaces
+        timetable_plugin.timetable(mock_msg)
 
-        self.assertTrue(mock_msg_obj.reply.called)
+        self.assertTrue(mock_msg.reply.called)
 
-        mock_msg_obj.reply.assert_called_with(
+        mock_msg.reply.assert_called_with(
             render('timetable_response.j2', context)
         )
 
     @patch('slackbot.dispatcher.Message', return_value=wrong_message)
     @patch('common.utils.make_api_request_for_timetables')
-    def test_timetable_with_wrong_message(self, utils_mock, mock_msg_object):
+    def test_timetable_with_wrong_message(self, utils_mock, mock_msg):
         utils_mock.return_value = [{'slug': 'timetable1'}]
 
-        mock_msg_object.body = self.wrong_msg
-        timetable_plugin.timetable(mock_msg_object)
+        mock_msg.body = self.wrong_msg
+        timetable_plugin.timetable(mock_msg)
 
-        self.assertTrue(mock_msg_object.reply.called)
+        self.assertTrue(mock_msg.reply.called)
 
-        mock_msg_object.reply.assert_called_with(
+        mock_msg.reply.assert_called_with(
             render('help_response.j2')
         )

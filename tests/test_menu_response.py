@@ -6,8 +6,8 @@ from faker import fake_creds, FakeClient, FakeMessage
 from common.utils import render
 
 
-class MenuHelperTest(TestCase):
-    servings = [
+def servings():
+    return [
         {
             'publicId': 'zaba4r4z',
             'dateServed': '2017-07-06',
@@ -46,32 +46,42 @@ class MenuHelperTest(TestCase):
         }
     ]
 
+
+def sorted_servings():
+    return {
+        'breakfast': [
+            {
+                'public_id': 'vl9l8b8w',
+                'course': 'main dish',
+                'sequence_order': 1,
+                'dish': 'rice'
+            },
+            {
+                'public_id': 'zaba4r4z',
+                'course': 'appetizer',
+                'sequence_order': 2,
+                'dish': 'bread'
+            }
+        ],
+        'lunch': [
+            {
+                'public_id': 'qrpr737y',
+                'course': 'main dish',
+                'sequence_order': 1,
+                'dish': 'beans'
+            }
+        ]
+    }
+
+
+class MenuHelperTest(TestCase):
+    """Tests the MenuHelper class."""
+
+    servings = servings()
+
     def setUp(self):
         self.menu_helper = MenuHelper()
-        self.sorted_servings = {
-            'breakfast': [
-                {
-                    'public_id': 'vl9l8b8w',
-                    'course': 'main dish',
-                    'sequence_order': 1,
-                    'dish': 'rice'
-                },
-                {
-                    'public_id': 'zaba4r4z',
-                    'course': 'appetizer',
-                    'sequence_order': 2,
-                    'dish': 'bread'
-                }
-            ],
-            'lunch': [
-                {
-                    'public_id': 'qrpr737y',
-                    'course': 'main dish',
-                    'sequence_order': 1,
-                    'dish': 'beans'
-                }
-            ]
-        }
+        self.sorted_servings = sorted_servings()
 
     def test_servings_to_dict(self):
         servings_to_dict = self.menu_helper.servings_to_dict(self.servings)
@@ -159,3 +169,92 @@ class MenuHelperTest(TestCase):
             'meals': meals
         }
         self.assertEqual(context, updated_context)
+
+
+class MenuTest(TestCase):
+    """Tests the menu function."""
+
+    client = FakeClient()
+    menu_msg = {
+        'channel': fake_creds['FAKE_CHANNEL'],
+        'type': 'message',
+        'text': 'menu'
+    }
+
+    menu_timetable = {
+        'channel': fake_creds['FAKE_CHANNEL'],
+        'type': 'message',
+        'text': 'menu timetable1'
+    }
+
+    menu_wong_timetable = {
+        'channel': fake_creds['FAKE_CHANNEL'],
+        'type': 'message',
+        'text': 'menu wrongstuff'
+    }
+
+    menu_message = FakeMessage(client, menu_msg)
+    menu_timetable = FakeMessage(client, menu_timetable)
+
+    @patch('slackbot.dispatcher.Message', return_value=menu_message)
+    @patch('common.utils.make_api_request_for_timetables')
+    @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
+    @patch('plugins.menu_plugin.MenuHelper.get_meals')
+    def test_menu_with_one_timetable(self, meals_mock, event_mock, utils_mock, mock_msg):
+        mock_msg.body = self.menu_msg
+        utils_mock.return_value = [{'slug': 'timetable1'}]
+        meals_mock.return_value = sorted_servings()
+        context = {
+            'timetable_names': ['timetable1'],
+            'day_of_week': 'today',
+            'meals': meals_mock.return_value
+        }
+        menu(mock_msg)
+
+        self.assertTrue(mock_msg.reply.called)
+        mock_msg.reply.assert_called_with(
+            render('menu_response.j2', context)
+        )
+
+    @patch('slackbot.dispatcher.Message', return_value=menu_message)
+    @patch('common.utils.make_api_request_for_timetables')
+    @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
+    @patch('plugins.menu_plugin.MenuHelper.get_meals')
+    def test_menu_with_multiple_timetable(self, meals_mock, event_mock, utils_mock, mock_msg):
+        mock_msg.body = self.menu_msg
+        utils_mock.return_value = [
+            {'slug': 'timetable1'},
+            {'slug': 'timetable2'}
+        ]
+        meals_mock.return_value = sorted_servings()
+        context = {
+            'timetable_names': ['timetable1', 'timetable2'],
+            'day_of_week': 'today',
+            'multiple_timetables': True
+        }
+        menu(mock_msg)
+
+        self.assertTrue(mock_msg.reply.called)
+        mock_msg.reply.assert_called_with(
+            render('menu_response.j2', context)
+        )
+
+    @patch('slackbot.dispatcher.Message', return_value=menu_timetable)
+    @patch('common.utils.make_api_request_for_timetables')
+    @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
+    @patch('plugins.menu_plugin.MenuHelper.get_meals')
+    def test_menu_timetable_command(self, meals_mock, event_mock, utils_mock, mock_msg):
+        mock_msg.body = self.menu_msg
+        utils_mock.return_value = [{'slug': 'timetable1'}]
+        meals_mock.return_value = sorted_servings()
+        context = {
+            'timetable_names': ['timetable1'],
+            'day_of_week': 'today',
+            'meals': meals_mock.return_value
+        }
+        menu(mock_msg)
+
+        self.assertTrue(mock_msg.reply.called)
+        mock_msg.reply.assert_called_with(
+            render('menu_response.j2', context)
+        )
