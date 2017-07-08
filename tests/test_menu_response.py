@@ -180,7 +180,7 @@ class MenuTest(TestCase):
     """Tests the menu function."""
 
     client = FakeClient()
-    menu_msg = {
+    menu = {
         'channel': fake_creds['FAKE_CHANNEL'],
         'type': 'message',
         'text': 'menu'
@@ -192,21 +192,36 @@ class MenuTest(TestCase):
         'text': 'menu timetable1'
     }
 
-    menu_wong_timetable = {
+    menu_wrong_timetable = {
         'channel': fake_creds['FAKE_CHANNEL'],
         'type': 'message',
         'text': 'menu wrongstuff'
     }
 
-    menu_message = FakeMessage(client, menu_msg)
-    menu_timetable = FakeMessage(client, menu_timetable)
+    menu_weekday = {
+        'channel': fake_creds['FAKE_CHANNEL'],
+        'type': 'message',
+        'text': 'menu timetable1 monday'
+    }
 
-    @patch('slackbot.dispatcher.Message', return_value=menu_message)
+    menu_wrong_weekday = {
+        'channel': fake_creds['FAKE_CHANNEL'],
+        'type': 'message',
+        'text': 'menu timetable1 blablabla'
+    }
+
+    menu_msg = FakeMessage(client, menu)
+    menu_timetable_msg = FakeMessage(client, menu_timetable)
+    menu_wrong_timetable_msg = FakeMessage(client, menu_wrong_timetable)
+    menu_weekday_msg = FakeMessage(client, menu_weekday)
+    menu_wrong_weekday_msg = FakeMessage(client, menu_wrong_weekday)
+
+    @patch('slackbot.dispatcher.Message', return_value=menu_msg)
     @patch('common.utils.make_api_request_for_timetables')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     @patch('plugins.menu_plugin.MenuHelper.get_meals')
     def test_menu_with_one_timetable(self, meals_mock, event_mock, utils_mock, mock_msg):
-        mock_msg.body = self.menu_msg
+        mock_msg.body = self.menu
         utils_mock.return_value = [{'slug': 'timetable1'}]
         meals_mock.return_value = sorted_servings()
         context = {
@@ -221,12 +236,12 @@ class MenuTest(TestCase):
             render('menu_response.j2', context)
         )
 
-    @patch('slackbot.dispatcher.Message', return_value=menu_message)
+    @patch('slackbot.dispatcher.Message', return_value=menu_msg)
     @patch('common.utils.make_api_request_for_timetables')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     @patch('plugins.menu_plugin.MenuHelper.get_meals')
     def test_menu_with_multiple_timetable(self, meals_mock, event_mock, utils_mock, mock_msg):
-        mock_msg.body = self.menu_msg
+        mock_msg.body = self.menu
         utils_mock.return_value = [
             {'slug': 'timetable1'},
             {'slug': 'timetable2'}
@@ -244,12 +259,12 @@ class MenuTest(TestCase):
             render('menu_response.j2', context)
         )
 
-    @patch('slackbot.dispatcher.Message', return_value=menu_timetable)
+    @patch('slackbot.dispatcher.Message', return_value=menu_timetable_msg)
     @patch('common.utils.make_api_request_for_timetables')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     @patch('plugins.menu_plugin.MenuHelper.get_meals')
     def test_menu_timetable_command(self, meals_mock, event_mock, utils_mock, mock_msg):
-        mock_msg.body = self.menu_msg
+        mock_msg.body = self.menu_timetable
         utils_mock.return_value = [{'slug': 'timetable1'}]
         meals_mock.return_value = sorted_servings()
         context = {
@@ -264,14 +279,48 @@ class MenuTest(TestCase):
             render('menu_response.j2', context)
         )
 
-    @patch('slackbot.dispatcher.Message', return_value=menu_wong_timetable)
+    @patch('slackbot.dispatcher.Message', return_value=menu_wrong_timetable_msg)
     @patch('common.utils.make_api_request_for_timetables')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     @patch('plugins.menu_plugin.MenuHelper.get_meals')
     def test_menu_with_wrong_timetable(self, meals_mock, event_mock, utils_mock, mock_msg):
-        mock_msg.body = self.menu_wong_timetable
+        mock_msg.body = self.menu_wrong_timetable
         utils_mock.return_value = [{'slug': 'timetable1'}]
+        menu(mock_msg)
 
+        self.assertTrue(mock_msg.reply.called)
+        mock_msg.reply.assert_called_with(
+            render('help_response.j2')
+        )
+
+    @patch('slackbot.dispatcher.Message', return_value=menu_weekday_msg)
+    @patch('common.utils.make_api_request_for_timetables')
+    @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
+    @patch('plugins.menu_plugin.MenuHelper.get_meals')
+    def test_menu_with_weekday(self, meals_mock, event_mock, utils_mock, mock_msg):
+        mock_msg.body = self.menu_weekday
+        utils_mock.return_value = [{'slug': 'timetable1'}]
+        meals_mock.return_value = sorted_servings()
+        context = {
+            'timetable_names': ['timetable1'],
+            'day_of_week': 'monday',
+            'meals': meals_mock.return_value
+        }
+        menu(mock_msg)
+
+        self.assertTrue(mock_msg.reply.called)
+        mock_msg.reply.assert_called_with(
+            render('menu_response.j2', context)
+        )
+
+    @patch('slackbot.dispatcher.Message', return_value=menu_wrong_weekday_msg)
+    @patch('common.utils.make_api_request_for_timetables')
+    @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
+    @patch('plugins.menu_plugin.MenuHelper.get_meals')
+    def test_menu_with_wrong_weekday(self, meals_mock, event_mock, utils_mock, mock_msg):
+        mock_msg.body = self.menu_wrong_weekday
+        utils_mock.return_value = [{'slug': 'timetable1'}]
+        meals_mock.return_value = sorted_servings()
         menu(mock_msg)
 
         self.assertTrue(mock_msg.reply.called)
