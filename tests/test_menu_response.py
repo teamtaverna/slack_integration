@@ -1,6 +1,8 @@
 from unittest import TestCase
 from unittest.mock import patch
 
+from freezegun import freeze_time
+
 from plugins.menu_plugin import MenuHelper, menu
 from faker import fake_creds, FakeClient, FakeMessage
 from common.utils import render
@@ -102,6 +104,7 @@ class MenuHelperTest(TestCase):
 
         self.assertEqual(meals, None)
 
+    @freeze_time('2017-07-06')
     @patch('common.utils.date_to_str', return_value='2017-07-06')
     @patch('plugins.menu_plugin.MenuHelper.make_api_request_for_events')
     def test_past_events(self, mock_event, day_mock):
@@ -118,9 +121,9 @@ class MenuHelperTest(TestCase):
 
         self.assertEqual(events, [])
 
-    @patch('common.utils.date_to_str', return_value='2017-07-06')
+    @freeze_time('2017-07-06')
     @patch('plugins.menu_plugin.MenuHelper.make_api_request_for_events')
-    def test_present_events(self, mock_event, day_mock):
+    def test_present_events(self, mock_event):
         event_list = [
             {
                 'name': 'event1',
@@ -134,14 +137,15 @@ class MenuHelperTest(TestCase):
 
         self.assertEqual(events, event_list)
 
-    @patch('common.utils.date_to_str', return_value='2017-07-06')
+    @freeze_time('2017-07-06')
     @patch('plugins.menu_plugin.MenuHelper.make_api_request_for_events')
-    def test_no_event(self, mock_event, day_mock):
+    def test_no_event(self, mock_event):
         mock_event.return_value = []
         events = self.menu_helper.get_event('today')
 
         self.assertEqual(events, [])
 
+    @freeze_time('2017-07-06')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=['random'])
     def test_meals_check_context_update_with_events(self, mock_obj):
         meals = self.sorted_servings
@@ -156,6 +160,7 @@ class MenuHelperTest(TestCase):
         }
         self.assertEqual(context, updated_context)
 
+    @freeze_time('2017-07-06')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     def test_meals_check_context_update_without_events(self, mock_obj):
         meals = self.sorted_servings
@@ -257,4 +262,19 @@ class MenuTest(TestCase):
         self.assertTrue(mock_msg.reply.called)
         mock_msg.reply.assert_called_with(
             render('menu_response.j2', context)
+        )
+
+    @patch('slackbot.dispatcher.Message', return_value=menu_wong_timetable)
+    @patch('common.utils.make_api_request_for_timetables')
+    @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
+    @patch('plugins.menu_plugin.MenuHelper.get_meals')
+    def test_menu_with_wrong_timetable(self, meals_mock, event_mock, utils_mock, mock_msg):
+        mock_msg.body = self.menu_wong_timetable
+        utils_mock.return_value = [{'slug': 'timetable1'}]
+
+        menu(mock_msg)
+
+        self.assertTrue(mock_msg.reply.called)
+        mock_msg.reply.assert_called_with(
+            render('help_response.j2')
         )
