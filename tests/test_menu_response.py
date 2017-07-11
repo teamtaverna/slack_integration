@@ -217,7 +217,7 @@ class MenuTest(TestCase):
     menu_wrong_weekday_msg = FakeMessage(client, menu_wrong_weekday)
 
     @patch('slackbot.dispatcher.Message', return_value=menu_msg)
-    @patch('common.utils.make_api_request_for_timetables')
+    @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     @patch('plugins.menu_plugin.MenuHelper.get_meals')
     def test_menu_with_one_timetable(self, meals_mock, event_mock, utils_mock, mock_msg):
@@ -237,7 +237,7 @@ class MenuTest(TestCase):
         )
 
     @patch('slackbot.dispatcher.Message', return_value=menu_msg)
-    @patch('common.utils.make_api_request_for_timetables')
+    @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     @patch('plugins.menu_plugin.MenuHelper.get_meals')
     def test_menu_with_multiple_timetable(self, meals_mock, event_mock, utils_mock, mock_msg):
@@ -260,7 +260,7 @@ class MenuTest(TestCase):
         )
 
     @patch('slackbot.dispatcher.Message', return_value=menu_timetable_msg)
-    @patch('common.utils.make_api_request_for_timetables')
+    @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     @patch('plugins.menu_plugin.MenuHelper.get_meals')
     def test_menu_timetable_command(self, meals_mock, event_mock, utils_mock, mock_msg):
@@ -280,7 +280,7 @@ class MenuTest(TestCase):
         )
 
     @patch('slackbot.dispatcher.Message', return_value=menu_wrong_timetable_msg)
-    @patch('common.utils.make_api_request_for_timetables')
+    @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     @patch('plugins.menu_plugin.MenuHelper.get_meals')
     def test_menu_with_wrong_timetable(self, meals_mock, event_mock, utils_mock, mock_msg):
@@ -294,7 +294,7 @@ class MenuTest(TestCase):
         )
 
     @patch('slackbot.dispatcher.Message', return_value=menu_weekday_msg)
-    @patch('common.utils.make_api_request_for_timetables')
+    @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     @patch('plugins.menu_plugin.MenuHelper.get_meals')
     def test_menu_with_weekday(self, meals_mock, event_mock, utils_mock, mock_msg):
@@ -314,7 +314,7 @@ class MenuTest(TestCase):
         )
 
     @patch('slackbot.dispatcher.Message', return_value=menu_wrong_weekday_msg)
-    @patch('common.utils.make_api_request_for_timetables')
+    @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     @patch('plugins.menu_plugin.MenuHelper.get_meals')
     def test_menu_with_wrong_weekday(self, meals_mock, event_mock, utils_mock, mock_msg):
@@ -329,7 +329,7 @@ class MenuTest(TestCase):
         )
 
     @patch('slackbot.dispatcher.Message', return_value=menu_msg)
-    @patch('common.utils.make_api_request_for_timetables')
+    @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     @patch('plugins.menu_plugin.MenuHelper.get_meals')
     def test_menu_with_empty_db(self, meals_mock, event_mock, utils_mock, mock_msg):

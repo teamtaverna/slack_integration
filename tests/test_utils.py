@@ -1,12 +1,13 @@
 import datetime
-import unittest
+from unittest import TestCase
+from unittest.mock import patch
 
 from freezegun import freeze_time
 
-from common.utils import DateHelper
+from common.utils import DateHelper, TimetableAPIUtils
 
 
-class GetDateTest(unittest.TestCase):
+class GetDateTest(TestCase):
 
     def setUp(self):
         self.helper = DateHelper()
@@ -71,3 +72,40 @@ class GetDateTest(unittest.TestCase):
                          datetime.date(2017, 3, 16))
         self.assertEqual(self.helper.get_date(days[9]),
                          datetime.date(2017, 3, 14))
+
+
+class TestAPICalls(TestCase):
+
+    def setUp(self):
+        self.timetable_api = TimetableAPIUtils()
+
+    @patch('common.utils.make_api_request')
+    def test_make_api_request_for_timetables_with_invalid_token(self, api_mock):
+        api_mock.return_value = {'message': 'Invalid Token'}
+        timetable_res = self.timetable_api.make_api_request_for_timetables()
+
+        self.assertEqual(timetable_res, [])
+
+    @patch('common.utils.make_api_request')
+    def test_make_api_request_for_timetables_with_empty_db(self, api_mock):
+        api_mock.return_value = {'timetables': {'edges': []}}
+        timetable_res = self.timetable_api.make_api_request_for_timetables()
+
+        self.assertEqual(timetable_res, [])
+
+    @patch('common.utils.make_api_request')
+    def test_make_api_request_for_timetables(self, api_mock):
+        timetables = [
+            {
+                'name': 'timetable1',
+                'slug': 'timetable1',
+                'cycleLength': 5,
+                'refCycleDay': 2,
+                'vendors': {'edges': []},
+                'admins': {'edges': []}
+            }
+        ]
+        api_mock.return_value = {'timetables': timetables}
+        timetable_res = self.timetable_api.make_api_request_for_timetables()
+
+        self.assertEqual(timetable_res, timetables)

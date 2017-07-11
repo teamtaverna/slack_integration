@@ -5,7 +5,7 @@ from dateutil import parser
 from slackbot.bot import respond_to
 
 from common.utils import (DateHelper, render, make_api_request,
-                          list_timetable_names,)
+                          TimetableAPIUtils,)
 
 
 class MenuHelper:
@@ -94,7 +94,8 @@ def menu(message):
     message_text_list = message.body['text'].lower().split()
     len_msg_text_list = len(message_text_list)
     message_text = ' '.join(message_text_list)
-    timetable_names = list_timetable_names()
+    timetable_res = TimetableAPIUtils()
+    timetable_names = timetable_res.list_timetable_names()
 
     if len_msg_text_list > 1:
         timetable_name = message_text_list[1]

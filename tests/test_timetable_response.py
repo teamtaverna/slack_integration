@@ -33,7 +33,7 @@ class TestTimetableFunction(TestCase):
     correct_msg_with_spaces = FakeMessage(client, correct_msg_spaces)
 
     @patch('slackbot.dispatcher.Message', return_value=correct_message)
-    @patch('common.utils.make_api_request_for_timetables')
+    @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
     def test_timetable_with_correct_message(self, utils_mock, mock_msg):
         utils_mock.return_value = [{'slug': 'timetable1'}]
         context = {
@@ -49,7 +49,7 @@ class TestTimetableFunction(TestCase):
         )
 
     @patch('slackbot.dispatcher.Message', return_value=correct_msg_with_spaces)
-    @patch('common.utils.make_api_request_for_timetables')
+    @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
     def test_timetable_with_spaces_in_correct_msg(self, utils_mock, mock_msg):
         utils_mock.return_value = [{'slug': 'timetable1'}]
         context = {
@@ -65,7 +65,7 @@ class TestTimetableFunction(TestCase):
         )
 
     @patch('slackbot.dispatcher.Message', return_value=wrong_message)
-    @patch('common.utils.make_api_request_for_timetables')
+    @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
     def test_timetable_with_wrong_message(self, utils_mock, mock_msg):
         utils_mock.return_value = [{'slug': 'timetable1'}]
 
@@ -79,7 +79,7 @@ class TestTimetableFunction(TestCase):
         )
 
     @patch('slackbot.dispatcher.Message', return_value=correct_message)
-    @patch('common.utils.make_api_request_for_timetables')
+    @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
     def test_timetable_with_with_empty_db(self, utils_mock, mock_msg):
         utils_mock.return_value = []
         context = {
