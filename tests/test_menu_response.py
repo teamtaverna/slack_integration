@@ -327,3 +327,22 @@ class MenuTest(TestCase):
         mock_msg.reply.assert_called_with(
             render('help_response.j2')
         )
+
+    @patch('slackbot.dispatcher.Message', return_value=menu_msg)
+    @patch('common.utils.make_api_request_for_timetables')
+    @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
+    @patch('plugins.menu_plugin.MenuHelper.get_meals')
+    def test_menu_with_empty_db(self, meals_mock, event_mock, utils_mock, mock_msg):
+        mock_msg.body = self.menu
+        utils_mock.return_value = []
+        context = {
+            'timetable_names': [],
+            'day_of_week': 'today',
+            'no_timetable': True
+        }
+        menu(mock_msg)
+
+        self.assertTrue(mock_msg.reply.called)
+        mock_msg.reply.assert_called_with(
+            render('menu_response.j2', context)
+        )
