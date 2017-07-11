@@ -25,7 +25,7 @@ class TestTimetableFunction(TestCase):
     wrong_msg = {
         'channel': fake_creds['FAKE_CHANNEL'],
         'type': 'message',
-        'text': 'show tietable bla'
+        'text': 'show timetables'
     }
 
     correct_message = FakeMessage(client, correct_msg)
@@ -76,4 +76,20 @@ class TestTimetableFunction(TestCase):
 
         mock_msg.reply.assert_called_with(
             render('help_response.j2')
+        )
+
+    @patch('slackbot.dispatcher.Message', return_value=correct_message)
+    @patch('common.utils.make_api_request_for_timetables')
+    def test_timetable_with_with_empty_db(self, utils_mock, mock_msg):
+        utils_mock.return_value = []
+        context = {
+            'timetable_names': []
+        }
+        mock_msg.body = self.correct_msg
+        timetable_plugin.timetable(mock_msg)
+
+        self.assertTrue(mock_msg.reply.called)
+
+        mock_msg.reply.assert_called_with(
+            render('timetable_response.j2', context)
         )
