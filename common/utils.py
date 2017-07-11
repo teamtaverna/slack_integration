@@ -87,7 +87,11 @@ def make_api_request(query):
 def make_api_request_for_timetables():
     query = 'query{timetables{edges{node{name, slug, cycleLength,refCycleDay, \
              vendors{edges{node{name}}}, admins{edges{node{username}}}}}}}'
-    return make_api_request(query)['timetables']
+    res = make_api_request(query)
+    if res.get('timetables'):
+        return res.get('timetables')
+    else:
+        return []
 
 
 def list_timetable_names():

@@ -10,7 +10,7 @@ def timetable(message):
     message_text_list = message.body['text'].lower().split()
     len_msg_text_list = len(message_text_list)
 
-    if len_msg_text_list == 2:
+    if len_msg_text_list == 2 and message_text_list[1] == 'timetable':
         timetable_names = list_timetable_names()
         context = {
             'timetable_names': timetable_names

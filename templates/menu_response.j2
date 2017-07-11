@@ -8,7 +8,7 @@
                 {{dict_item['public_id']}}: {{dict_item['dish']|title}} ({{dict_item['course']|lower}})
             {% endfor %}
         {% endfor %}```
-{% elif no_meals %}
+{% elif no_meals or no_timetable %}
     ```Sorry there are no meals available for {{ day_of_week }}.```
 {% elif multiple_timetables %}
     ```{{ timetables(timetable_names) }}

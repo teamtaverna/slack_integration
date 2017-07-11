@@ -107,7 +107,9 @@ def menu(message):
     }
 
     if message_text == 'menu':
-        if num_timetables == 1:
+        if num_timetables < 1:
+            context.update({'no_timetable': True})
+        elif num_timetables == 1:
             meals = helper.get_meals(timetable_names[0], 'today')
             helper.meals_check_context_update(meals, context, 'today')
         else:
