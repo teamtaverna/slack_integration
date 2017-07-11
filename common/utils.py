@@ -7,66 +7,66 @@ import dotenv
 dotenv.load()
 
 
-def get_days():
-    return ['monday', 'tuesday', 'wednesday', 'thursday', 'friday',
-            'saturday', 'sunday', 'today', 'tomorrow', 'yesterday']
+class DateHelper:
+    """Contains methods for day to date conversion."""
 
+    def get_days(self):
+        return ['monday', 'tuesday', 'wednesday', 'thursday', 'friday',
+                'saturday', 'sunday', 'today', 'tomorrow', 'yesterday']
 
-def _get_day_arg(day_arg):
-    """
-    This function takes in a day argument and returns the right timedelta
-    days argument for it.
-    For example, yesterday will be returned as -1, so that get_date function
-    can convert it to the appropriate pythonic date object.
-    We also want to be able to convert weekdays and some date format here.
-    """
-    day_arg = day_arg.strip().lower()
+    def _get_day_arg(self, day_arg):
+        """
+        This method takes in a day argument and returns the right timedelta
+        days argument for it.
+        For example, yesterday will be returned as -1, so that get_date
+        method can convert it to the appropriate pythonic date object.
+        We also want to be able to convert weekdays and some date format here.
+        """
+        day_arg = day_arg.strip().lower()
 
-    day_to_num_dict = {
-        'yesterday': -1,
-        'today': 0,
-        'tomorrow': 1
-    }
+        day_to_num_dict = {
+            'yesterday': -1,
+            'today': 0,
+            'tomorrow': 1
+        }
 
-    day_num = day_to_num_dict.get(day_arg)
+        day_num = day_to_num_dict.get(day_arg)
 
-    # More logic if a weekday value is passed in.
-    if day_num is not None:
-        return day_num
-    else:
-        days = get_days()
-
-        if day_arg in days:
-            # In python, Monday is 0 and Sunday is 6
-            current_weekday_num = date.today().weekday()
-            day_index = days.index(day_arg)
-
-            if current_weekday_num == day_index:
-                # The weekday passed in is today
-                return day_to_num_dict['today']
-            else:
-                return day_index - current_weekday_num
+        # More logic if a weekday value is passed in.
+        if day_num is not None:
+            return day_num
         else:
-            raise ValueError('Cannot resolve date argument passed in.')
+            days = self.get_days()
 
+            if day_arg in days:
+                # In python, Monday is 0 and Sunday is 6
+                current_weekday_num = date.today().weekday()
+                day_index = days.index(day_arg)
 
-def get_date(day_arg):
-    """
-    This function handles conversion of date input from users into
-    something python can understand. For instance, when the user types
-    in something like yesterday, we want to return the date of yesterday.
-    """
-    day_num = _get_day_arg(day_arg)
-    return date.today() + timedelta(days=day_num)
+                if current_weekday_num == day_index:
+                    # The weekday passed in is today
+                    return day_to_num_dict['today']
+                else:
+                    return day_index - current_weekday_num
+            else:
+                raise ValueError('Cannot resolve date argument passed in.')
 
+    def get_date(self, day_arg):
+        """
+        This method handles conversion of date input from users into
+        something python can understand. For instance, when the user types
+        in something like yesterday, we want to return the date of yesterday.
+        """
+        day_num = self._get_day_arg(day_arg)
+        return date.today() + timedelta(days=day_num)
 
-def date_to_str(day_arg):
-    """
-    This function converts the python date format gotten from get_date function
-    to string for graphql api request.
-    """
-    date = get_date(day_arg)
-    return date.strftime('%Y-%m-%d')
+    def date_to_str(self, day_arg):
+        """
+        This method converts the python date format gotten from
+        get_date method to string for graphql api request.
+        """
+        date = self.get_date(day_arg)
+        return date.strftime('%Y-%m-%d')
 
 
 def render(filename, context={}, error=None, path='templates'):

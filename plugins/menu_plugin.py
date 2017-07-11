@@ -4,12 +4,14 @@ from operator import itemgetter
 from dateutil import parser
 from slackbot.bot import respond_to
 
-from common.utils import (get_days, render, make_api_request, date_to_str,
+from common.utils import (DateHelper, render, make_api_request,
                           list_timetable_names,)
 
 
 class MenuHelper:
     """Contains helper functions for menu response."""
+
+    date_helper = DateHelper()
 
     def make_api_request_for_servings(self, timetable, date):
         query = 'query{servings(timetable:"%s",date:"%s"){publicId, dateServed, vendor{name},\
@@ -54,7 +56,7 @@ class MenuHelper:
         day is a string either today, tomorrow, yesterday, or any weekday
         """
         servings = self.make_api_request_for_servings(
-            timetable, date_to_str(day)
+            timetable, self.date_helper.date_to_str(day)
         )
 
         if servings is not None:
@@ -66,7 +68,7 @@ class MenuHelper:
         event_list = []
 
         if events:
-            date = parser.parse(date_to_str(day)).isoformat()
+            date = parser.parse(self.date_helper.date_to_str(day)).isoformat()
             for event in events:
                 start_date = parser.parse(event['startDate']).isoformat()
                 end_date = parser.parse(event['endDate']).isoformat()
@@ -84,8 +86,9 @@ class MenuHelper:
 
 @respond_to('menu', re.IGNORECASE)
 def menu(message):
-    helper = MenuHelper()
-    days = get_days()
+    menu_helper = MenuHelper()
+    date_helper = DateHelper()
+    days = date_helper.get_days()
     # Convert message text to list to remove multiple spaces that may have
     # been mistakenly added by the user and convert the list back to string
     message_text_list = message.body['text'].lower().split()
@@ -110,8 +113,8 @@ def menu(message):
         if num_timetables < 1:
             context.update({'no_timetable': True})
         elif num_timetables == 1:
-            meals = helper.get_meals(timetable_names[0], 'today')
-            helper.meals_check_context_update(meals, context, 'today')
+            meals = menu_helper.get_meals(timetable_names[0], 'today')
+            menu_helper.meals_check_context_update(meals, context, 'today')
         else:
             context.update({'multiple_timetables': True})
 
@@ -120,8 +123,8 @@ def menu(message):
 
     elif len_msg_text_list == 2 and timetable_name in timetable_names:
         # User entered "menu TIMETABLE_NAME"
-        meals = helper.get_meals(timetable_name, 'today')
-        helper.meals_check_context_update(meals, context, 'today')
+        meals = menu_helper.get_meals(timetable_name, 'today')
+        menu_helper.meals_check_context_update(meals, context, 'today')
 
         response = render('menu_response.j2', context)
         message.reply(response)
@@ -130,9 +133,9 @@ def menu(message):
           timetable_name in timetable_names and
           day_of_week in days):
         # User entered "menu TIMETABLE_NAME day"
-        meals = helper.get_meals(timetable_name, day_of_week)
+        meals = menu_helper.get_meals(timetable_name, day_of_week)
         context.update({'day_of_week': day_of_week})
-        helper.meals_check_context_update(meals, context, day_of_week)
+        menu_helper.meals_check_context_update(meals, context, day_of_week)
 
         response = render('menu_response.j2', context)
         message.reply(response)

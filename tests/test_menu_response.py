@@ -105,7 +105,7 @@ class MenuHelperTest(TestCase):
         self.assertEqual(meals, None)
 
     @freeze_time('2017-07-06')
-    @patch('common.utils.date_to_str', return_value='2017-07-06')
+    @patch('common.utils.DateHelper.date_to_str', return_value='2017-07-06')
     @patch('plugins.menu_plugin.MenuHelper.make_api_request_for_events')
     def test_past_events(self, mock_event, day_mock):
         event_list = [
