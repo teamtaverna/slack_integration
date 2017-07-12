@@ -17,12 +17,16 @@ class MenuHelper:
         query = 'query{servings(timetable:"%s",date:"%s"){publicId, dateServed, vendor{name},\
                  menuItem{cycleDay,meal{name},course{name,sequenceOrder},\
                  dish{name},timetable{name}}}}' % (timetable, date)
-        return make_api_request(query)['servings']
+        res = make_api_request(query)
+        servings = res.get('servings')
+        if servings:
+            return servings
 
     def make_api_request_for_events(self):
         query = 'query {events{edges{node{name, action, startDate, endDate}}}}'
-        events = make_api_request(query)['events']
-        if 'edges' not in events:
+        res = make_api_request(query)
+        events = res.get('events')
+        if events and 'edges' not in events:
             return events
 
     def servings_to_dict(self, servings):
