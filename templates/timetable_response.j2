@@ -1,9 +1,13 @@
 {% from 'shared_macros.j2' import timetables %}
-{% if timetable_names %}
-    ```{{ timetables(timetable_names) }}
-    You can get menu with the command "menu TIMETABLE_NAME"
-    OR type "help" to see a list of more commands.
-    ```
-{% else %}
-    ```Sorry, there is no available timetable.```
+```
+{% if error %}
+{{ error }}
 {% endif %}
+{% if timetable_names %}
+{{ timetables(timetable_names) }}
+You can get menu with the command "menu TIMETABLE_NAME"
+OR type "help" to see a list of more commands.
+{% else %}
+Sorry, there is no available timetable.
+{% endif %}
+```
