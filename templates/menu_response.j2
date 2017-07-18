@@ -16,4 +16,11 @@
     ```{{ timetables(timetable_names) }}
     Please try again with the command "menu TIMETABLE_NAME"
     OR type "help" to see a list of more commands.```
+{% elif invalid_day %}
+    ```
+    Valid days accepted are:
+    {% for day in days -%}
+        {{ day }}
+    {% endfor %}
+    ```
 {% endif %}

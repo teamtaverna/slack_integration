@@ -92,6 +92,19 @@ class MenuHelper:
         else:
             context.update({'no_meals': True})
 
+    def timetable_check_context_update(self, num_timetables, timetable_name, context):
+        if num_timetables < 1:
+            context.update({'no_timetable': True})
+
+            response = render('menu_response.j2', context)
+        else:
+            error = '{} is not a valid timetable name.'.format(
+                timetable_name
+            )
+
+            response = render('timetable_response.j2', error=error)
+        return response
+
 
 @respond_to('menu', re.IGNORECASE)
 def menu(message):
@@ -137,23 +150,30 @@ def menu(message):
 
             response = render('menu_response.j2', context)
         else:
-            if num_timetables < 1:
-                context.update({'no_timetable': True})
-                response = render('menu_response.j2')
-            else:
-                error = '{} is not a valid timetable name.'.format(timetable_name)
-                response = render('timetable_response.j2', error=error)
+            response = menu_helper.timetable_check_context_update(
+                num_timetables, timetable_name, context
+            )
 
-    elif (len_msg_text_list == 3 and
-          timetable_name in timetable_names and
-          day_of_week in days):
-        # User entered "menu TIMETABLE_NAME day"
-        meals = menu_helper.get_meals(timetable_name, day_of_week)
-        context.update({'day_of_week': day_of_week})
-        menu_helper.meals_check_context_update(meals, context, day_of_week)
+    elif len_msg_text_list == 3:
+        if timetable_name in timetable_names and day_of_week in days:
+            # User entered "menu TIMETABLE_NAME day"
+            meals = menu_helper.get_meals(timetable_name, day_of_week)
+            context.update({'day_of_week': day_of_week})
+            menu_helper.meals_check_context_update(meals, context, day_of_week)
 
-        response = render('menu_response.j2', context)
+            response = render('menu_response.j2', context)
+        elif timetable_name not in timetable_names:
+            response = menu_helper.timetable_check_context_update(
+                num_timetables, timetable_name, context
+            )
+        elif day_of_week not in days:
+            error = 'You did not enter a valid day.'
+            context.update({
+                'invalid_day': True,
+                'days': days
+            })
 
+            response = render('menu_response.j2', context, error)
     else:
         error = 'I think you entered a wrong menu command.'
         response = render('help_response.j2', error=error)
