@@ -5,7 +5,7 @@ from freezegun import freeze_time
 
 from plugins.menu_plugin import MenuHelper, menu
 from faker import fake_creds, FakeClient, FakeMessage
-from common.utils import render
+from common.utils import render, DateHelper
 
 
 def servings():
@@ -175,10 +175,33 @@ class MenuHelperTest(TestCase):
         }
         self.assertEqual(context, updated_context)
 
+    def test_timetable_check_context_update_with_no_timetable(self):
+        context = {'random': 'stuff'}
+        response = self.menu_helper.timetable_check_context_update(
+            0, 'timetable1', context
+        )
+        updated_context = {
+            'random': 'stuff',
+            'no_timetable': True
+        }
+        expected = render('menu_response.j2', updated_context)
+        self.assertEqual(response, expected)
+
+    def test_timetable_check_context_update_with_available_timetable(self):
+        context = {}
+        response = self.menu_helper.timetable_check_context_update(
+            1, 'timetable1', context
+        )
+        error = 'timetable1 is not a valid timetable name.'
+
+        expected = render('timetable_response.j2', error=error)
+        self.assertEqual(response, expected)
+
 
 class MenuTest(TestCase):
     """Tests the menu function."""
 
+    date_helper = DateHelper()
     client = FakeClient()
     menu = {
         'channel': fake_creds['FAKE_CHANNEL'],
@@ -240,6 +263,25 @@ class MenuTest(TestCase):
     @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
     @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
     @patch('plugins.menu_plugin.MenuHelper.get_meals')
+    def test_menu_with_no_timetable(self, meals_mock, event_mock, utils_mock, mock_msg):
+        mock_msg.body = self.menu
+        utils_mock.return_value = []
+        context = {
+            'timetable_names': [],
+            'day_of_week': 'today',
+            'no_timetable': True
+        }
+        menu(mock_msg)
+
+        self.assertTrue(mock_msg.reply.called)
+        mock_msg.reply.assert_called_with(
+            render('menu_response.j2', context)
+        )
+
+    @patch('slackbot.dispatcher.Message', return_value=menu_msg)
+    @patch('common.utils.TimetableAPIUtils.make_api_request_for_timetables')
+    @patch('plugins.menu_plugin.MenuHelper.get_event', return_value=[])
+    @patch('plugins.menu_plugin.MenuHelper.get_meals')
     def test_menu_with_multiple_timetable(self, meals_mock, event_mock, utils_mock, mock_msg):
         mock_msg.body = self.menu
         utils_mock.return_value = [
@@ -286,11 +328,24 @@ class MenuTest(TestCase):
     def test_menu_with_wrong_timetable(self, meals_mock, event_mock, utils_mock, mock_msg):
         mock_msg.body = self.menu_wrong_timetable
         utils_mock.return_value = [{'slug': 'timetable1'}]
+        error = 'wrongstuff is not a valid timetable name.'
+
         menu(mock_msg)
 
         self.assertTrue(mock_msg.reply.called)
         mock_msg.reply.assert_called_with(
-            render('help_response.j2')
+            render('timetable_response.j2', error=error)
+        )
+
+        # Test when there are no timetables available in the database
+        utils_mock.return_value = []
+        context = {
+            'random': 'stuff',
+            'no_timetable': True
+        }
+        menu(mock_msg)
+        mock_msg.reply.assert_called_with(
+            render('menu_response.j2', context)
         )
 
     @patch('slackbot.dispatcher.Message', return_value=menu_weekday_msg)
@@ -321,11 +376,18 @@ class MenuTest(TestCase):
         mock_msg.body = self.menu_wrong_weekday
         utils_mock.return_value = [{'slug': 'timetable1'}]
         meals_mock.return_value = sorted_servings()
+        error = 'You did not enter a valid day.'
+        context = {
+            'random': 'stuff',
+            'invalid_day': True,
+            'days': self.date_helper.get_days()
+        }
+
         menu(mock_msg)
 
         self.assertTrue(mock_msg.reply.called)
         mock_msg.reply.assert_called_with(
-            render('help_response.j2')
+            render('menu_response.j2', context, error)
         )
 
     @patch('slackbot.dispatcher.Message', return_value=menu_msg)
