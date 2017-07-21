@@ -1,5 +1,27 @@
 ```
-SHOW HELP MENU: help
+{% if error %}
+{{ error }}
+{% endif %}
+The following commands are valid:
 
-<More help functionality will be updated as features are added>
+GET HELP: help
+
+LIST AVAILABLE TIMETABLES: show timetable
+
+GET MENU: menu
+(if available timetable is just one, you will get the menu for today.
+Else you will be given a list of available timetables to get choose from.)
+
+GET MENU FOR A TIMETABLE: menu TIMETABLE_NAME
+(For example: menu lagos
+By default this gives you menu for today for the specific timetable given)
+
+GET MENU FOR A TIMETABLE TODAY: menu TIMETABLE_NAME today
+
+GET MENU FOR YESTERDAY FOR A TIMETABLE: menu TIMETABLE_NAME yesterday
+
+GET MENU FOR TOMORROW FOR A TIMETABLE: menu TIMETABLE_NAME tomorrow
+
+GET MENU FOR THE ANY DAY FOR A TIMETABLE: menu TIMETABLE_NAME DAY_OF_WEEK
+(For example: menu TIMETABLE_NAME monday)
 ```

@@ -45,6 +45,7 @@ Next,
 * Create a `.env` file and copy the contents of `.env.example` file to it.
 * Replace
   - `SLACKBOT_API_TOKEN` with an actual slackbot token. Reach out to any of the collaborators for help with that.
+  - `X-TAVERNATOKEN ` with an actual taverna core api token. It can be generated from the API section in Core admin.
 
 ### Development
 

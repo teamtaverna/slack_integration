@@ -1,0 +1,26 @@
+{% from 'shared_macros.j2' import timetables %}
+
+{% if meals %}
+    ```Here is the menu for {{ day_of_week }}.
+        {% for meal, values in meals.items() -%}
+            {{ meal|upper }}:
+            {% for dict_item in values -%}
+                {{dict_item['public_id']}}: {{dict_item['dish']|title}} ({{dict_item['course']|lower}})
+            {% endfor %}
+        {% endfor %}```
+{% elif no_meals %}
+    ```Sorry there are no meals available for {{ day_of_week }}.```
+{% elif no_timetable %}
+    ```Sorry, we cannot find any meals because there are no timetables available.```
+{% elif multiple_timetables %}
+    ```{{ timetables(timetable_names) }}
+    Please try again with the command "menu TIMETABLE_NAME"
+    OR type "help" to see a list of more commands.```
+{% elif invalid_day %}
+    ```
+    Valid days accepted are:
+    {% for day in days -%}
+        {{ day }}
+    {% endfor %}
+    ```
+{% endif %}
