@@ -14,8 +14,8 @@ class ReviewHelper:
                 anonymityId: "%s", comment: "%s"})\
                 {review{id,originalId,value,comment,anonymityId,serving{publicId}}}}' % \
                 (serving_id, rating_value, anonymity_id, comment)
-
         res = make_api_request(query)
+
         if 'review' in res:
             if res['review'] is None:
                 return 'duplicate'
