@@ -1,7 +1,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/teamtaverna/slack_integration/badge.svg?branch=master)](https://coveralls.io/github/teamtaverna/slack_integration?branch=master) [![Build Status](https://travis-ci.org/teamtaverna/slack_integration.svg?branch=master)](https://travis-ci.org/teamtaverna/slack_integration)
 
 # FoodBoard Slack Integration
-Slackbot for FoodBoard app, an open source meal review and management platform. More information can be found on the [wiki](https://github.com/teamtaverna/assets/wiki).
+Slackbot for FoodBoard app, an open source meal review and management platform. More information can be found on the [wiki](https://github.com/teamtaverna/assets/wiki). You can download the latest release [here](https://github.com/teamtaverna/slack_integration/releases/latest). FoodBoard Slack Integration is dependant on [Core](https://github.com/teamtaverna/core) which needs to be set up alongside.
 
 ### Tech
 
