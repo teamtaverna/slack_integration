@@ -92,13 +92,12 @@ class TimetableAPIUtils:
     """Contains shared methods for Timetable API functionality."""
 
     def make_api_request_for_timetables(self):
-        query = 'query{timetables{edges{node{name, slug, cycleLength,refCycleDay, \
+        query = 'query{timetables{edges{node{name, slug, cycleLength, refCycleDay, isActive\
                  vendors{edges{node{name}}}, admins{edges{node{username}}}}}}}'
         res = make_api_request(query)
         timetables = res.get('timetables')
-
         if timetables and 'edges' not in timetables:
-            return timetables
+            return [timetable for timetable in timetables if timetable['isActive']]
         else:
             return []
 
