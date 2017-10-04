@@ -11,10 +11,7 @@ FoodBoard slackbot is written in Python3 and built on [lins05/slackbot](https://
 
 Want to contribute? Great!
 
-Clone the repository from [GitHub](https://www.github.com)
-```
-$ git clone https://github.com/teamtaverna/slack_integration.git
-```
+Fork the repository. Please read the CONTRIBUTING.md guide.
 
 FoodBoard slackbot depends on [FoodBoard Core](https://github.com/teamtaverna/core), its API. You'd need to set up [FoodBoard Core](https://github.com/teamtaverna/core) project also in order to work effectively locally.
 
@@ -60,4 +57,7 @@ Watch the bot come online on slack in a few seconds.
 To run tests
 ```
 $ python -m unittest discover tests 'test_*.py'
+```
+```
+$ flake8 .
 ```
