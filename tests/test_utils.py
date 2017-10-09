@@ -101,6 +101,7 @@ class TestAPICalls(TestCase):
                 'slug': 'timetable1',
                 'cycleLength': 5,
                 'refCycleDay': 2,
+                'isActive': True,
                 'vendors': {'edges': []},
                 'admins': {'edges': []}
             }
