@@ -47,7 +47,12 @@ def review(message):
         ReviewHelper.render_template_with_error(message, error)
     else:
         serving_id = message_text_list[1]
-        rating_value = int(message_text_list[2])
+        try:
+            rating_value = int(message_text_list[2])
+        except ValueError:
+            error = '{} is not a valid number'.format(message_text_list[2])
+            ReviewHelper.render_template_with_error(message, error)
+            return
 
         # Check that rating value is of valid range (1 - 5)
         if rating_value not in range(1, 6):
