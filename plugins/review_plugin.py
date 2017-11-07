@@ -62,7 +62,7 @@ def review(message):
 
         anonymity_id = ReviewHelper.hash_string(message.body['user'])
         if len(message_text_list) > 3:
-            comment = message_text_list[3:]
+            comment = ' '.join(message_text_list[3:]).capitalize()
             review = ReviewHelper.make_api_request_for_review(
                 serving_id, rating_value, anonymity_id, comment
             )
