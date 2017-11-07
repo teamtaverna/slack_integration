@@ -27,6 +27,12 @@ class TestReview(TestCase):
         'text': 'rate abc1 6'
     }
 
+    invalid_rating_msg_string = {
+        'channel': fake_creds['FAKE_CHANNEL'],
+        'type': 'message',
+        'text': 'rate abc1 good'
+    }
+
     valid_rating_msg = {
         'channel': fake_creds['FAKE_CHANNEL'],
         'type': 'message',
@@ -37,6 +43,7 @@ class TestReview(TestCase):
     wrong_msg_format = FakeMessage(client, wrong_msg)
     invalid_rating_value0 = FakeMessage(client, invalid_rating_msg0)
     invalid_rating_value6 = FakeMessage(client, invalid_rating_msg6)
+    invalid_rating_value_str = FakeMessage(client, invalid_rating_msg_string)
     valid_rating = FakeMessage(client, valid_rating_msg)
 
     @patch('slackbot.dispatcher.Message', return_value=wrong_msg_format)
@@ -85,6 +92,18 @@ class TestReview(TestCase):
         self.assertTrue(mock_msg.reply.called)
         mock_msg.reply.assert_called_with(
             render('review_response.j2', context=context)
+        )
+
+    @patch('plugins.review_plugin.ReviewHelper.make_api_request_for_review')
+    @patch('slackbot.dispatcher.Message', return_value=invalid_rating_value_str)
+    def test_invalid_number_for_rating(self, mock_msg, api_mock):
+        mock_msg.body = self.invalid_rating_msg_string
+        review(mock_msg)
+        error = 'good is not a valid number'
+
+        self.assertTrue(mock_msg.reply.called)
+        mock_msg.reply.assert_called_with(
+            render('review_response.j2', error=error)
         )
 
     @patch('plugins.review_plugin.ReviewHelper.make_api_request_for_review')
